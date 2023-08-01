@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .block {
+            min-height: 100px;
+            width: 100%;
+            height: 50%;
+        }
+
+        #blue {
+            background-color: blue;
+        }
+
+        #green {
+            background-color: greenyellow;
+        }
+
+        #pinq {
+            background-color: pink;
+        }
+
+        #orange {
+            background-color: orange;
+        }
+
+        #arrow {
+            display: flex;
+            height: 100%;
+            cursor: pointer;
+            font-size: 24px;
+            align-items: center;
+        }
+
+        #container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        #slider-left,
+        #slider-right {
+            text-align: center;
+            cursor: pointer;
+            font-size: 24px;
+            position: relative;
+            user-select: none;
+        }
+
+        #left,
+        #right {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slider-fill {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: transparent;
+            z-index: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="left">
+            <div class="block" id="blue"></div>
+            <div class="slider-fill" id="left-slider-fill"></div>
+            <div id="slider-left">=</div>
+            <div class="block" id="pinq"></div>
+        </div>
+        <div id="arrow">◀</div>
+        <div id="right">
+            <div class="block" id="green"></div>
+            <div class="slider-fill" id="right-slider-fill"></div>
+            <div id="slider-right">=</div>
+            <div class="block" id="orange"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var leftIsVisible = true;
+
+            $("#arrow").on("click", function () {
+                if (leftIsVisible) {
+                    $("#left").hide();
+                } else {
+                    $("#left").show();
+                }
+                leftIsVisible = !leftIsVisible;
+
+                $(this).text(function (i, text) {
+                    return text === "◀" ? "▶" : "◀";
+                });
+            });
+
+            function adjustBlockHeight(slider, mouseY) {
+                var containerTop = $("#container").offset().top;
+                var containerHeight = $("#container").height();
+                var sliderHeight = $(".slider-fill").height();
+                var newHeight = (mouseY - containerTop) / containerHeight * 100;
+
+                newHeight = Math.max(newHeight, 100);
+                newHeight = Math.min(newHeight, 50);
+
+                var bottomBlockHeight = 100 - newHeight;
+
+                if (slider === "left") {
+                    $("#blue, #pinq").css("height", newHeight + "%");
+                    $("#green, #orange").css("height", bottomBlockHeight + "%");
+                    $("#left-slider-fill").css("height", newHeight - sliderHeight / 2 + "%");
+                } else {
+                    $("#pinq, #orange").css("height", newHeight + "%");
+                    $("#blue, #green").css("height", bottomBlockHeight + "%");
+                    $("#right-slider-fill").css("height", newHeight - sliderHeight / 2 + "%");
+                }
+            }
+
+            var isDraggingLeft = false;
+            var isDraggingRight = false;
+
+            $(document).on("mousedown", "#slider-left", function () {
+                isDraggingLeft = true;
+            });
+
+            $(document).on("mousedown", "#slider-right", function () {
+                isDraggingRight = true;
+            });
+
+            $(document).on("mouseup", function () {
+                isDraggingLeft = false;
+                isDraggingRight = false;
+            });
+
+            $(document).on("mousemove", function (e) {
+                if (isDraggingLeft) {
+                    adjustBlockHeight("left", e.clientY);
+                }
+                if (isDraggingRight) {
+                    adjustBlockHeight("right", e.clientY);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
